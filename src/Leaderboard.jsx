@@ -1,0 +1,51 @@
+export default function Leaderboard({ players }) {
+  const dataset = Object.values(players).map((p) => {
+    const total = p.wins + p.losses;
+    const rate = total > 0 ? ((p.wins / total) * 100).toFixed(0) : 0;
+    return { ...p, rate: Number(rate) };
+  }).sort((a, b) => b.rate - a.rate || b.wins - a.wins);
+
+  return (
+    <div>
+      <table className="stat-table">
+        <thead>
+          <tr>
+            <th style={{ textAlign: "left" }}>Player</th>
+            <th style={{ textAlign: "center" }}>W - L</th>
+            <th style={{ textAlign: "right" }}>Winrate</th>
+          </tr>
+        </thead>
+        <tbody>
+          {dataset.length === 0 ? (
+            <tr>
+              <td colSpan="3" style={{ textAlign: "center", color: "#6c7263", fontSize: "0.85rem", paddingTop: "1rem" }}>
+                No records found.
+              </td>
+            </tr>
+          ) : (
+            dataset.map((player) => (
+              <tr key={player.name}>
+                <td style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  {player.image ? (
+                    <img src={player.image} alt="" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }} />
+                  ) : (
+                    <div style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "var(--charcoal-dark)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.65rem", fontWeight: "bold" }}>
+                      {player.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  {player.name}
+                </td>
+                <td style={{ textAlign: "center", color: "var(--gray-text-muted)", fontWeight: 600 }}>
+                  {player.wins} - {player.losses}
+                </td>
+                <td style={{ textAlign: "right" }}>
+                  <span className="badge-winrate">{player.rate}%</span>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}

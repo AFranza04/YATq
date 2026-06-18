@@ -1,38 +1,238 @@
-.App {
-  text-align: center;
+/* Color Palette Archetype - Premium Optic Yellow & Charcoal */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #fdfdfa;
+  --optic-yellow: #e5ff00;
+  --optic-gold-dark: #acc000;
+  --charcoal-dark: #111210;
+  --charcoal-light: #242622;
+  --gray-border: #e4e6df;
+  --gray-bg-muted: #f4f6ee;
+  --gray-text-muted: #5c6255;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-secondary);
+  color: var(--charcoal-dark);
+  letter-spacing: -0.01em;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+/* Layout Wrappers */
+.app-container {
+  min-height: 100vh;
+  padding-bottom: 4rem;
+}
+
+.app-header {
+  background-color: var(--charcoal-dark);
+  color: var(--bg-primary);
+  padding: 1.25rem 2rem;
+  border-bottom: 5px solid var(--optic-yellow);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-grid {
+  max-width: 1200px;
+  margin: 2.5rem auto;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 400px 1fr;
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.main-column {
   display: flex;
   flex-direction: column;
+  gap: 2.5rem;
+}
+
+/* Modular Panel Cards */
+.panel-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--gray-border);
+  border-radius: 12px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 12px rgba(17, 18, 16, 0.02);
+}
+
+.panel-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--charcoal-dark);
+  border-left: 5px solid var(--charcoal-dark);
+  padding-left: 0.75rem;
+}
+
+/* Input Form System */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  color: var(--gray-text-muted);
+  letter-spacing: 0.5px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--gray-border);
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 0.95rem;
+  background-color: var(--bg-secondary);
+  color: var(--charcoal-dark);
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--charcoal-dark);
+  background-color: var(--bg-primary);
+  box-shadow: 0 0 0 3px rgba(229, 255, 0, 0.4);
+}
+
+/* Pipelines / Waiting Queues Layout */
+.queue-box {
+  background-color: var(--gray-bg-muted);
+  border: 1px solid var(--gray-border);
+  border-radius: 8px;
+  padding: 1rem;
+  min-height: 90px;
+}
+
+.queue-item {
+  background: var(--bg-primary);
+  border: 1px solid var(--gray-border);
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
 }
 
-.App-link {
-  color: #61dafb;
+/* Premium Buttons Architecture */
+.btn-primary {
+  width: 100%;
+  background-color: var(--optic-yellow);
+  color: var(--charcoal-dark);
+  font-weight: 800;
+  padding: 0.85rem;
+  border: 1px solid var(--charcoal-dark);
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.75px;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 0px var(--charcoal-dark);
+  transition: all 0.1s ease;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.btn-primary:hover {
+  background-color: var(--optic-gold-dark);
+}
+
+.btn-primary:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0px var(--charcoal-dark);
+}
+
+.btn-score-win {
+  background-color: var(--bg-primary);
+  border: 2px solid var(--charcoal-dark);
+  color: var(--charcoal-dark);
+  font-weight: 800;
+  padding: 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+
+.btn-score-win:hover {
+  background-color: var(--charcoal-dark);
+  color: var(--optic-yellow);
+}
+
+/* Dedicated Single Court Arena Styles */
+.court-card-single {
+  border: 3px solid var(--charcoal-dark);
+  border-radius: 12px;
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  box-shadow: 0 10px 30px rgba(17, 18, 16, 0.04);
+}
+
+.court-card-single.occupied {
+  background-color: rgba(225, 255, 0, 0.01);
+}
+
+.match-team {
+  padding: 0.85rem 1.25rem;
+  background-color: var(--gray-bg-muted);
+  border-radius: 6px;
+  border: 1px solid var(--gray-border);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Standings Leaderboards Table */
+.stat-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.stat-table th {
+  padding: 0.6rem 0;
+  font-size: 0.7rem;
+  color: var(--gray-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--charcoal-dark);
+}
+
+.stat-table td {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--gray-border);
+  font-size: 0.95rem;
+}
+
+.badge-winrate {
+  background-color: var(--charcoal-dark);
+  color: var(--optic-yellow);
+  font-weight: 800;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
 }
