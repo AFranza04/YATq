@@ -15,6 +15,7 @@ export default function App() {
   const [winnersQueue, setWinnersQueue] = useState([]);
   const [losersQueue, setLosersQueue] = useState([]);
   const [court, setCourt] = useState(INITIAL_COURT);
+  const [isCourtVisible] = useState(true);
   const [winningMatchResult, setWinningMatchResult] = useState(null);
 
   const videoRef = useRef(null);
