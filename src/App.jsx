@@ -13,8 +13,9 @@ export default function App() {
   const [winningMatchResult, setWinningMatchResult] = useState(null);
   const [court, setCourt] = useState(INITIAL_COURT);
   const [endGameSummary, setEndGameSummary] = useState(null);
-  const [nextStreamType, setNextStreamType] = useState("winners");
+  const [nextStreamType, setNextStreamType] = useState("winners"); // Alternates: "winners" <-> "losers"
 
+  // --- LOCAL STORAGE CORE SAVES ---
   const [players, setPlayers] = useState(() => {
     const saved = localStorage.getItem("dinka_players");
     return saved ? JSON.parse(saved) : {};
@@ -53,7 +54,7 @@ export default function App() {
       videoRef.current.srcObject = stream;
       streamRef.current = stream;
     } catch (err) {
-      console.error("Camera error: ", err);
+      console.error("Camera access error: ", err);
       setIsCameraActive(false);
     }
   };
@@ -64,6 +65,8 @@ export default function App() {
     canvas.width = 300;
     canvas.height = 300;
     const ctx = canvas.getContext("2d");
+    
+    // Mirroring snapshot canvas conversion logic
     ctx.translate(300, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(videoRef.current, 0, 0, 300, 300);
@@ -90,13 +93,29 @@ export default function App() {
     setPlayerImage(null);
   };
 
+  const handleDeletePlayer = (targetName) => {
+    if (court.status === "Occupied" && [...court.team1, ...court.team2].includes(targetName)) {
+      alert("Cannot delete a player while they are actively playing a match on court!");
+      return;
+    }
+    if (!window.confirm(`Remove ${targetName} from the tournament entirely?`)) return;
+
+    setPlayers((prev) => {
+      const copy = { ...prev };
+      delete copy[targetName];
+      return copy;
+    });
+    setGeneralQueue((prev) => prev.filter(name => name !== targetName));
+    setWinnersQueue((prev) => prev.filter(name => name !== targetName));
+    setLosersQueue((prev) => prev.filter(name => name !== targetName));
+  };
+
   const handleShufflePool = () => {
     setGeneralQueue((prev) => [...prev].sort(() => Math.random() - 0.5));
   };
 
   const triggerNextAutomatedMatch = () => {
     if (court.status === "Occupied") return;
-
     let team1 = [];
     let team2 = [];
 
@@ -137,7 +156,6 @@ export default function App() {
         return;
       }
     }
-
     setCourt({ ...court, status: "Occupied", team1, team2 });
   };
 
@@ -183,7 +201,7 @@ export default function App() {
     <div className="app-container">
       <header className="app-header">
         <div className="header-content">
-          <h1 style={{ margin: 0, fontWeight: 900, fontSize: "1.65rem", letterSpacing: "-0.5px" }}>⚡ dinka ni o</h1>
+          <h1 style={{ margin: 0, fontWeight: 900, fontSize: "1.65rem", letterSpacing: "-0.5px" }}>clvb or pickle?</h1>
           <button onClick={handleTriggerEndSession} className="btn-primary" style={{ width: "auto", padding: "0.5rem 1rem", boxShadow: "3px 3px 0px var(--charcoal-dark)" }}>
             🏁 End Session
           </button>
@@ -205,12 +223,12 @@ export default function App() {
               </div>
               <button type="submit" className="btn-primary">Add Player</button>
             </form>
-            {generalQueue.length > 0 && <button onClick={handleShufflePool} className="btn-primary" style={{ marginTop: "1rem", backgroundColor: "var(--gray-border)", boxShadow: "none", color: "var(--charcoal-dark)" }}>🎲 Shuffle Waiting Pool</button>}
+            {generalQueue.length > 0 && <button onClick={handleShufflePool} className="btn-primary" style={{ marginTop: "1rem", backgroundColor: "var(--gray-border)", boxShadow: "none", color: "var(--charcoal-dark)" }}>🎲 Shuffle Pool</button>}
           </div>
 
           <div className="panel-card">
             <h2 className="panel-title">Standings & Placings</h2>
-            <Leaderboard players={players} />
+            <Leaderboard players={players} onDeletePlayer={handleDeletePlayer} />
           </div>
         </div>
 
@@ -223,7 +241,7 @@ export default function App() {
           <div className="panel-card">
             <h2 className="panel-title">Rotation Pipelines</h2>
             <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-              <QueueSection title="1. Fresh Waiting Pool" queueData={generalQueue} playersData={players} tagColor="var(--charcoal-dark)" />
+              <QueueSection title="1. Fresh Waiting Pool" queueData={generalQueue} playersData={players} tagColor="var(--charcoal-dark)" onDeletePlayer={handleDeletePlayer} showDelete={true} />
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                 <QueueSection title="2. Winners Line" queueData={winnersQueue} playersData={players} tagColor="var(--optic-yellow)" />
                 <QueueSection title="3. Losers Line" queueData={losersQueue} playersData={players} tagColor="var(--gray-border)" />
@@ -233,6 +251,7 @@ export default function App() {
         </div>
       </main>
 
+      {/* WINNER ALERT POPUP */}
       {winningMatchResult && (
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(17, 18, 16, 0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "1rem" }}>
           <div className="panel-card" style={{ maxWidth: "450px", width: "100%", textAlign: "center", border: "3px solid var(--charcoal-dark)" }}>
@@ -254,54 +273,56 @@ export default function App() {
         </div>
       )}
 
+      {/* THE UPDATED END SESSION CEREMONY OVERLAY */}
       {endGameSummary && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "var(--bg-secondary)", display: "flex", flexDirection: "column", zIndex: 2000, overflowY: "auto", padding: "2rem 1rem" }}>
-          <div style={{ maxWidth: "600px", width: "100%", margin: "0 auto" }}>
+        <div className="end-session-overlay">
+          <div className="end-session-modal-card">
             <div style={{ textAlign: "center", marginBottom: "2rem" }}>
               <span style={{ fontSize: "3.5rem" }}>🏁</span>
               <h1 style={{ fontWeight: 900, textTransform: "uppercase", fontSize: "2.25rem", margin: "0.5rem 0 0 0" }}>Session Concluded</h1>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-end", gap: "1rem", marginBottom: "3rem", background: "var(--gray-bg-muted)", padding: "2rem 1rem", borderRadius: "12px", border: "1px solid var(--gray-border)" }}>
+            <div className="podium-container">
+              {/* Silver #2 */}
               {endGameSummary[1] && (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100px" }}>
-                  {endGameSummary[1].image ? <img src={endGameSummary[1].image} alt="" style={{ width: "55px", height: "55px", borderRadius: "50%", objectFit: "cover", border: "3px solid #b0b0b0" }} /> : <div style={{ width: "55px", height: "55px", borderRadius: "50%", backgroundColor: "#b0b0b0", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold" }}>🥈</div>}
-                  <span style={{ fontWeight: 800, fontSize: "0.85rem", marginTop: "0.4rem" }}>{endGameSummary[1].name}</span>
-                  <div style={{ backgroundColor: "#b0b0b0", color: "white", fontWeight: 900, width: "100%", textAlign: "center", padding: "0.5rem 0", borderRadius: "4px 4px 0 0", marginTop: "0.5rem", fontSize: "0.8rem" }}>#2 Silver</div>
+                <div className="podium-column" style={{ width: "110px" }}>
+                  {endGameSummary[1].image ? <img src={endGameSummary[1].image} alt="" style={{ width: "60px", height: "60px", borderRadius: "50%", objectFit: "cover", border: "3px solid #b0b8ad" }} /> : <div style={{ width: "60px", height: "60px", borderRadius: "50%", backgroundColor: "#b0b8ad", display: "flex", alignItems: "center", justifyContent: "center" }}>🥈</div>}
+                  <span style={{ fontWeight: 800, fontSize: "0.85rem", marginTop: "0.4rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100px" }}>{endGameSummary[1].name}</span>
+                  <div className="podium-base-silver">#2 Silver</div>
                 </div>
               )}
+              {/* Gold #1 */}
               {endGameSummary[0] && (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "120px" }}>
-                  {endGameSummary[0].image ? <img src={endGameSummary[0].image} alt="" style={{ width: "75px", height: "75px", borderRadius: "50%", objectFit: "cover", border: "4px solid var(--optic-yellow)" }} /> : <div style={{ width: "75px", height: "75px", borderRadius: "50%", backgroundColor: "var(--charcoal-dark)", color: "var(--optic-yellow)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "1.5rem" }}>👑</div>}
-                  <span style={{ fontWeight: 900, fontSize: "1rem", marginTop: "0.4rem" }}>{endGameSummary[0].name}</span>
-                  <div style={{ backgroundColor: "var(--charcoal-dark)", color: "var(--optic-yellow)", fontWeight: 900, width: "100%", textAlign: "center", padding: "1rem 0", borderRadius: "6px 6px 0 0", marginTop: "0.5rem", fontSize: "0.95rem" }}>#1 Gold</div>
+                <div className="podium-column" style={{ width: "130px" }}>
+                  {endGameSummary[0].image ? <img src={endGameSummary[0].image} alt="" style={{ width: "80px", height: "80px", borderRadius: "50%", objectFit: "cover", border: "4px solid var(--optic-yellow)" }} /> : <div style={{ width: "80px", height: "80px", borderRadius: "50%", backgroundColor: "var(--charcoal-dark)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem" }}>👑</div>}
+                  <span style={{ fontWeight: 900, fontSize: "1.05rem", marginTop: "0.4rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "120px" }}>{endGameSummary[0].name}</span>
+                  <div className="podium-base-gold">#1 Gold</div>
                 </div>
               )}
+              {/* Bronze #3 */}
               {endGameSummary[2] && (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100px" }}>
-                  {endGameSummary[2].image ? <img src={endGameSummary[2].image} alt="" style={{ width: "55px", height: "55px", borderRadius: "50%", objectFit: "cover", border: "3px solid #cd7f32" }} /> : <div style={{ width: "55px", height: "55px", borderRadius: "50%", backgroundColor: "#cd7f32", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold" }}>🥉</div>}
-                  <span style={{ fontWeight: 800, fontSize: "0.85rem", marginTop: "0.4rem" }}>{endGameSummary[2].name}</span>
-                  <div style={{ backgroundColor: "#cd7f32", color: "white", fontWeight: 900, width: "100%", textAlign: "center", padding: "0.35rem 0", borderRadius: "4px 4px 0 0", marginTop: "0.5rem", fontSize: "0.75rem" }}>#3 Bronze</div>
+                <div className="podium-column" style={{ width: "110px" }}>
+                  {endGameSummary[2].image ? <img src={endGameSummary[2].image} alt="" style={{ width: "60px", height: "60px", borderRadius: "50%", objectFit: "cover", border: "3px solid #cd7f32" }} /> : <div style={{ width: "60px", height: "60px", borderRadius: "50%", backgroundColor: "#cd7f32", display: "flex", alignItems: "center", justifyContent: "center" }}>🥉</div>}
+                  <span style={{ fontWeight: 800, fontSize: "0.85rem", marginTop: "0.4rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100px" }}>{endGameSummary[2].name}</span>
+                  <div className="podium-base-bronze">#3 Bronze</div>
                 </div>
               )}
             </div>
 
-            <div className="panel-card" style={{ marginBottom: "2rem" }}>
+            <div className="panel-card" style={{ marginBottom: "2rem", boxShadow: "none", background: "var(--bg-card)" }}>
               <h3 className="panel-title">Final Standings</h3>
               <table className="stat-table">
                 <thead>
                   <tr>
-                    <th>Player</th>
-                    <th style={{ textAlign: "center" }}>Matches</th>
-                    <th style={{ textAlign: "center" }}>Record</th>
-                    <th style={{ textAlign: "right" }}>Win Rate</th>
+                    <th style={{ textAlign: "left", width: "50%" }}>Player</th>
+                    <th style={{ textAlign: "center", width: "25%" }}>Record</th>
+                    <th style={{ textAlign: "right", width: "25%" }}>Win Rate</th>
                   </tr>
                 </thead>
                 <tbody>
                   {endGameSummary.map((p, index) => (
                     <tr key={p.name}>
                       <td style={{ fontWeight: 700 }}>#{index + 1} {p.name}</td>
-                      <td style={{ textAlign: "center", color: "var(--gray-text-muted)" }}>{p.total}</td>
                       <td style={{ textAlign: "center", fontWeight: 600 }}>{p.wins}W - {p.losses}L</td>
                       <td style={{ textAlign: "right" }}><span className="badge-winrate">{p.rate}%</span></td>
                     </tr>
@@ -311,8 +332,8 @@ export default function App() {
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-              <button className="btn-primary" style={{ backgroundColor: "var(--gray-border)", color: "var(--charcoal-dark)", boxShadow: "none" }} onClick={() => setEndGameSummary(null)}>⬅️ Back to Board</button>
-              <button className="btn-primary" style={{ backgroundColor: "#ff3b30", color: "white", borderColor: "#cc2e24", boxShadow: "none" }} onClick={handleConfirmCloseSession}>❌ Close & Purge Session</button>
+              <button className="btn-primary" style={{ backgroundColor: "var(--gray-border)", color: "var(--charcoal-dark)", boxShadow: "4px 4px 0px var(--charcoal-dark)" }} onClick={() => setEndGameSummary(null)}>⬅️ Back to Board</button>
+              <button className="btn-primary" style={{ backgroundColor: "#ff3b30", color: "white", borderColor: "#cc2e24", boxShadow: "4px 4px 0px var(--charcoal-dark)" }} onClick={handleConfirmCloseSession}>❌ Close Session</button>
             </div>
           </div>
         </div>

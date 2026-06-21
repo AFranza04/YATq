@@ -1,4 +1,4 @@
-export default function QueueSection({ title, queueData, playersData, tagColor }) {
+export default function QueueSection({ title, queueData, playersData, tagColor, onDeletePlayer, showDelete = false }) {
   return (
     <div style={{ flex: 1 }}>
       <h4 style={{ margin: "0 0 0.75rem 0", fontSize: "0.85rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.5px" }}>
@@ -23,7 +23,18 @@ export default function QueueSection({ title, queueData, playersData, tagColor }
                     )}
                     <span>{playerName}</span>
                   </div>
-                  <span style={{ fontSize: "0.75rem", color: "var(--gray-text-muted)" }}>#{idx + 1}</span>
+                  
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <span style={{ fontSize: "0.75rem", color: "var(--gray-text-muted)" }}>#{idx + 1}</span>
+                    {showDelete && (
+                      <button 
+                        onClick={() => onDeletePlayer(playerName)}
+                        style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem", padding: 0 }}
+                      >
+                        ❌
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}

@@ -1,4 +1,4 @@
-export default function Leaderboard({ players }) {
+export default function Leaderboard({ players, onDeletePlayer }) {
   const dataset = Object.values(players).map((p) => {
     const total = p.wins + p.losses;
     const rate = total > 0 ? ((p.wins / total) * 100).toFixed(0) : 0;
@@ -25,17 +25,26 @@ export default function Leaderboard({ players }) {
           ) : (
             dataset.map((player, index) => (
               <tr key={player.name}>
-                <td style={{ fontWeight: 700, display: "flex", alignItems: "center" }}>
-                  {/* Dynamic placement rank indicators */}
-                  <span className="rank-badge">#{index + 1}</span>
-                  {player.image ? (
-                    <img src={player.image} alt="" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover", marginRight: "0.5rem" }} />
-                  ) : (
-                    <div style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "var(--charcoal-dark)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.65rem", fontWeight: "bold", marginRight: "0.5rem" }}>
-                      {player.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  {player.name}
+                <td style={{ fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <span className="rank-badge">#{index + 1}</span>
+                    {player.image ? (
+                      <img src={player.image} alt="" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover", marginRight: "0.5rem" }} />
+                    ) : (
+                      <div style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "var(--charcoal-dark)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.65rem", fontWeight: "bold", marginRight: "0.5rem" }}>
+                        {player.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <span>{player.name}</span>
+                  </div>
+                  {/* Action Delete Button */}
+                  <button 
+                    onClick={() => onDeletePlayer(player.name)} 
+                    style={{ background: "none", border: "none", color: "#ff3b30", cursor: "pointer", fontSize: "0.85rem", marginLeft: "0.5rem", padding: "0 0.25rem" }}
+                    title="Remove Player"
+                  >
+                    ❌
+                  </button>
                 </td>
                 <td style={{ textAlign: "center", color: "var(--gray-text-muted)", fontWeight: 600 }}>
                   {player.wins} - {player.losses}
