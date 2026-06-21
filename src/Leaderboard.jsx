@@ -10,9 +10,9 @@ export default function Leaderboard({ players }) {
       <table className="stat-table">
         <thead>
           <tr>
-            <th style={{ textAlign: "left" }}>Player</th>
+            <th style={{ textAlign: "left" }}>Rank & Player</th>
             <th style={{ textAlign: "center" }}>W - L</th>
-            <th style={{ textAlign: "right" }}>Winrate</th>
+            <th style={{ textAlign: "right" }}>Win Rate</th>
           </tr>
         </thead>
         <tbody>
@@ -23,13 +23,15 @@ export default function Leaderboard({ players }) {
               </td>
             </tr>
           ) : (
-            dataset.map((player) => (
+            dataset.map((player, index) => (
               <tr key={player.name}>
-                <td style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <td style={{ fontWeight: 700, display: "flex", alignItems: "center" }}>
+                  {/* Dynamic placement rank indicators */}
+                  <span className="rank-badge">#{index + 1}</span>
                   {player.image ? (
-                    <img src={player.image} alt="" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }} />
+                    <img src={player.image} alt="" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover", marginRight: "0.5rem" }} />
                   ) : (
-                    <div style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "var(--charcoal-dark)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.65rem", fontWeight: "bold" }}>
+                    <div style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "var(--charcoal-dark)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.65rem", fontWeight: "bold", marginRight: "0.5rem" }}>
                       {player.name.charAt(0).toUpperCase()}
                     </div>
                   )}

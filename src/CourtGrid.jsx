@@ -1,4 +1,4 @@
-export default function CourtGrid({ court, playersData, generalCount, winnersCount, losersCount, onAssign, onResolve }) {
+export default function CourtGrid({ court, playersData, generalCount, winnersCount, losersCount, nextStreamType, onLaunchNext, onResolve }) {
   const isOccupied = court.status === "Occupied";
 
   const renderPlayerBadge = (name) => {
@@ -15,6 +15,20 @@ export default function CourtGrid({ court, playersData, generalCount, winnersCou
         <span style={{ fontSize: "1rem", fontWeight: 700 }}>{name}</span>
       </div>
     );
+  };
+
+  // Determine what the single button display says based on queue content statuses
+  const getButtonText = () => {
+    if (generalCount >= 4) return `Play Fresh Pool Match (${Math.floor(generalCount / 4)} left)`;
+    
+    return nextStreamType === "winners" 
+      ? `Play Next: Winners Bracket Line ➡️` 
+      : `Play Next: Losers Bracket Line ➡️`;
+  };
+
+  const isButtonDisabled = () => {
+    if (generalCount >= 4) return false;
+    return winnersCount < 4 && losersCount < 4;
   };
 
   return (
@@ -61,19 +75,16 @@ export default function CourtGrid({ court, playersData, generalCount, winnersCou
       ) : (
         <div>
           <p style={{ color: "var(--gray-text-muted)", fontSize: "0.9rem", fontStyle: "italic", margin: "0 0 1.5rem 0" }}>
-            The court is vacant. Choose a pipeline to automatically pull the next 4 players:
+            The arena is vacant. Click below to pull the next 4 players automatically:
           </p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.75rem" }}>
-            <button className="btn-primary" style={{ backgroundColor: "var(--charcoal-dark)", color: "var(--bg-primary)", fontSize: "0.75rem" }} disabled={generalCount < 4} onClick={() => onAssign("general")}>
-              Fresh Pool ({Math.floor(generalCount / 4)})
-            </button>
-            <button className="btn-primary" style={{ fontSize: "0.75rem" }} disabled={winnersCount < 4} onClick={() => onAssign("winners")}>
-              Winners Line ({Math.floor(winnersCount / 4)})
-            </button>
-            <button className="btn-primary" style={{ backgroundColor: "var(--gray-border)", boxShadow: "0 4px 0px var(--charcoal-dark)", fontSize: "0.75rem" }} disabled={losersCount < 4} onClick={() => onAssign("losers")}>
-              Losers Line ({Math.floor(losersCount / 4)})
-            </button>
-          </div>
+          <button 
+            className="btn-primary" 
+            disabled={isButtonDisabled()}
+            onClick={onLaunchNext}
+            style={{ fontSize: "0.95rem", padding: "1.2rem" }}
+          >
+            {getButtonText()}
+          </button>
         </div>
       )}
     </div>
